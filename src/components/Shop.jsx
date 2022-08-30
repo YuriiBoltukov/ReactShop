@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { API_KEY, API_URL } from '../config';
+import { Alert } from './Alert';
 import { BasketList } from './BasketList';
 import { Cart } from './Cart';
 import { GoodsList } from './GoodsList';
@@ -10,6 +11,11 @@ export function Shop(props) {
 	const [loading, setLoading] = useState(true);
 	const [order, setOrder] = useState([]);
 	const [isBasketShow, setBasketShow] = useState(false);
+	const [alertName, setAlertName] = useState('');
+
+	const closeAlert = () => {
+		setAlertName('');
+	};
 
 	const removeFromBasket = itemId => {
 		const newOrder = order.filter(el => el.id !== itemId);
@@ -71,6 +77,7 @@ export function Shop(props) {
 			});
 			setOrder(newOrder);
 		}
+		setAlertName(item.name);
 	}
 
 	useEffect(function getGoods() {
@@ -102,6 +109,7 @@ export function Shop(props) {
 					incQuantity={incQuantity}
 				/>
 			)}
+			{alertName && <Alert name={alertName} closeAlert={closeAlert} />}
 		</main>
 	);
 }
