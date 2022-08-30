@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { API_KEY, API_URL } from '../config';
+import { BasketList } from './BasketList';
 import { Cart } from './Cart';
 import { GoodsList } from './GoodsList';
 import { Preloader } from './Preloader';
@@ -8,7 +9,46 @@ export function Shop(props) {
 	const [goods, setGoods] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [order, setOrder] = useState([]);
-	console.log(order);
+	const [isBasketShow, setBasketShow] = useState(false);
+
+	const removeFromBasket = itemId => {
+		const newOrder = order.filter(el => el.id !== itemId);
+		setOrder(newOrder);
+	};
+
+	const incQuantity = itemId => {
+		const newOrder = order.map(el => {
+			if (el.id === itemId) {
+				const newQuantity = el.quantity + 1;
+				return {
+					...el,
+					quantity: newQuantity,
+				};
+			} else {
+				return el;
+			}
+		});
+		setOrder(newOrder);
+	};
+	const decQuantity = itemId => {
+		const newOrder = order.map(el => {
+			if (el.id === itemId) {
+				const newQuantity = el.quantity - 1;
+				return {
+					...el,
+					quantity: newQuantity >= 0 ? newQuantity : 0,
+				};
+			} else {
+				return el;
+			}
+		});
+		setOrder(newOrder);
+	};
+
+	const handleBasketShow = () => {
+		setBasketShow(!isBasketShow);
+	};
+
 	function addToCart(item) {
 		const itemIndex = order.findIndex(orderItem => orderItem.id === item.id);
 
@@ -26,7 +66,7 @@ export function Shop(props) {
 						quantity: orderItem.quantity + 1,
 					};
 				} else {
-					return item;
+					return orderItem;
 				}
 			});
 			setOrder(newOrder);
@@ -47,11 +87,20 @@ export function Shop(props) {
 	}, []);
 	return (
 		<main className='container content'>
-			<Cart quantity={order.length} />
+			<Cart quantity={order.length} handleBasketShow={handleBasketShow} />
 			{loading ? (
 				<Preloader />
 			) : (
 				<GoodsList goods={goods} addToCart={addToCart} />
+			)}
+			{isBasketShow && (
+				<BasketList
+					order={order}
+					handleBasketShow={handleBasketShow}
+					removeFromBasket={removeFromBasket}
+					decQuantity={decQuantity}
+					incQuantity={incQuantity}
+				/>
 			)}
 		</main>
 	);
